@@ -18,7 +18,7 @@ tags:
 - name: student
   description: Student can be aded to course
 paths:
-  /request/teacher/{teacherId}/:
+  /request/teacher/:
     get:
       tags:
       - request
@@ -27,7 +27,7 @@ paths:
       operationId: teacherGetRequests
       parameters:
       - name: teacherId
-        in: path
+        in: query
         description: ID of teacher
         required: true
         schema:
@@ -49,7 +49,7 @@ paths:
           content: {}
       security:
         - Teacher: []
-  /request/student/{studentId}/:
+  /request/student/:
     get:
       tags:
       - request
@@ -58,7 +58,7 @@ paths:
       operationId: studentGetRequests
       parameters:
       - name: studentId
-        in: path
+        in: query
         description: ID of teacher
         required: true
         schema:
@@ -80,7 +80,7 @@ paths:
           content: {}
       security:
         - Student: []
-  /request/{studentId}:
+  /request:
     post:
       tags:
       - request
@@ -88,7 +88,7 @@ paths:
       operationId: addRequest
       parameters:
       - name: studentId
-        in: path
+        in: query
         description: ID of student
         required: true
         schema:
@@ -96,7 +96,7 @@ paths:
           format: int32
       - name: teacherId
         in: query
-        description: ID of teacher 
+        description: ID of teacher
         required: true
         schema:
           type: integer
@@ -121,7 +121,7 @@ paths:
           content: {}
       security:
         - Student: []
-  /request/student/{studentId}/{courseId}:
+  /request/student/{courseId}:
     delete:
       tags:
       - request
@@ -129,8 +129,8 @@ paths:
       operationId: studentDeleteRequest
       parameters:
       - name: studentId
-        in: path
-        description: ID of student 
+        in: query
+        description: ID of student
         required: true
         schema:
           type: integer
@@ -152,7 +152,7 @@ paths:
           content: {}
       security:
         - Student: []
-  /request/teacher/{teacherId}/{courseId}:
+  /request/teacher/{courseId}:
     delete:
       tags:
       - request
@@ -160,7 +160,7 @@ paths:
       operationId: teacherDeleteRequest
       parameters:
       - name: teacherId
-        in: path
+        in: query
         description: ID of teacher
         required: true
         schema:
@@ -183,9 +183,9 @@ paths:
           content: {}
       security:
         - Teacher: []
-       
 
-  /course/{teacherId}:
+
+  /course:
     put:
       tags:
       - course
@@ -193,7 +193,7 @@ paths:
       operationId: updateCourse
       parameters:
       - name: teacherId
-        in: path
+        in: query
         description: ID of teacher
         required: true
         schema:
@@ -226,7 +226,7 @@ paths:
         - Teacher: []
 
       x-codegen-request-body-name: body
-  
+
     post:
       tags:
       - course
@@ -234,14 +234,14 @@ paths:
       operationId: addCourse
       parameters:
       - name: teacherId
-        in: path
+        in: query
         description: ID of teacher
         required: true
         schema:
           type: integer
           format: int32
       requestBody:
-        description: To create new course 
+        description: To create new course
         content:
           application/json:
             schema:
@@ -260,7 +260,7 @@ paths:
       x-codegen-request-body-name: body
       security:
         - Teacher: []
-  /course/student/{studentId}/{courseId}:
+  /course/student/{courseId}:
     get:
       tags:
       - course
@@ -276,8 +276,8 @@ paths:
           type: integer
           format: int32
       - name: studentId
-        in: path
-        description: ID of student 
+        in: query
+        description: ID of student
         required: true
         schema:
           type: integer
@@ -297,7 +297,7 @@ paths:
           content: {}
       security:
         - Student: []
-  /course/student/{teacherId}/{courseId}:
+  /course/teacher/{courseId}:
     get:
       tags:
       - course
@@ -313,7 +313,7 @@ paths:
           type: integer
           format: int32
       - name: teacherId
-        in: path
+        in: query
         description: ID of teacher
         required: true
         schema:
@@ -335,7 +335,7 @@ paths:
           content: {}
       security:
         - Student: []
-  /course/{teacherId}/{courseId}:
+  /course/{courseId}:
     delete:
       tags:
       - course
@@ -350,7 +350,7 @@ paths:
           type: integer
           format: int64
       - name: teacherId
-        in: path
+        in: query
         description: ID of teacher
         required: true
         schema:
