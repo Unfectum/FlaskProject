@@ -1,0 +1,651 @@
+openapi: 3.0.1
+info:
+  title: Online lessons
+  description: 'This is a server for online lessons'
+  
+  version: 1.0.0
+
+servers:
+- url: https://lessons.swagger.io/v2
+- url: http://lessons.swagger.io/v2
+tags:
+- name: course
+  description: Educational course
+- name: request
+  description: Request to add to the course
+- name: teacher
+  description: Teacher that can create courses
+- name: student
+  description: Student can be aded to course
+paths:
+  /request/teacher/{teacherId}/:
+    get:
+      tags:
+      - request
+      summary: Get all requests
+      description: Return all teacher requests
+      operationId: teacherGetRequests
+      parameters:
+      - name: teacherId
+        in: path
+        description: ID of teacher
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Request'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+
+        404:
+          description: Requests not found
+          content: {}
+      security:
+        - Teacher: []
+  /request/student/{studentId}/:
+    get:
+      tags:
+      - request
+      summary: Get all requests
+      description: Return all student requests
+      operationId: studentGetRequests
+      parameters:
+      - name: studentId
+        in: path
+        description: ID of teacher
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Request'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+
+        404:
+          description: Requests not found
+          content: {}
+      security:
+        - Student: []
+  /request/{studentId}:
+    post:
+      tags:
+      - request
+      summary: Creates a new request
+      operationId: addRequest
+      parameters:
+      - name: studentId
+        in: path
+        description: ID of student
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: teacherId
+        in: query
+        description: ID of teacher 
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: courseId
+        in: query
+        description: ID of course
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        description: Creating request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request'
+        required: true
+      responses:
+        201:
+          description: Created
+          content: {}
+      security:
+        - Student: []
+  /request/student/{studentId}/{courseId}:
+    delete:
+      tags:
+      - request
+      summary: Deletes a request
+      operationId: studentDeleteRequest
+      parameters:
+      - name: studentId
+        in: path
+        description: ID of student 
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: courseId
+        in: path
+        description: Course id to delete
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        204:
+          description: Success
+          content: {}
+
+        404:
+          description: Pet not found
+          content: {}
+      security:
+        - Student: []
+  /request/teacher/{teacherId}/{courseId}:
+    delete:
+      tags:
+      - request
+      summary: Deletes a request
+      operationId: teacherDeleteRequest
+      parameters:
+      - name: teacherId
+        in: path
+        description: ID of teacher
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: courseId
+        in: path
+        description: Request id to delete
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        204:
+          description: Success
+          content: {}
+
+        404:
+          description: Pet not found
+          content: {}
+      security:
+        - Teacher: []
+       
+
+  /course/{teacherId}:
+    put:
+      tags:
+      - course
+      summary: Update an existing course
+      operationId: updateCourse
+      parameters:
+      - name: teacherId
+        in: path
+        description: ID of teacher
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        description: Course object that needs to be added to the list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Course'
+        required: true
+      responses:
+        200:
+          description: Success
+          content: {}
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Course not found
+          content: {}
+        405:
+          description: Validation exception
+          content: {}
+      security:
+        - Teacher: []
+
+      x-codegen-request-body-name: body
+  
+    post:
+      tags:
+      - course
+      summary: Add a new course
+      operationId: addCourse
+      parameters:
+      - name: teacherId
+        in: path
+        description: ID of teacher
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        description: To create new course 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Course'
+        required: true
+      responses:
+        405:
+          description: Invalid input
+          content: {}
+        201:
+          description: Created
+          content: {}
+      x-codegen-request-body-name: body
+      security:
+        - Teacher: []
+  /course/student/{studentId}/{courseId}:
+    get:
+      tags:
+      - course
+      summary: Student get course by ID
+      description: Returns a single course
+      operationId: studentGetCoursebyId
+      parameters:
+      - name: courseId
+        in: path
+        description: ID of course to return
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: studentId
+        in: path
+        description: ID of student 
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Course'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        404:
+          description: Course not found
+          content: {}
+      security:
+        - Student: []
+  /course/student/{teacherId}/{courseId}:
+    get:
+      tags:
+      - course
+      summary: Find course by ID
+      description: Returns a single pet
+      operationId: teacherGetCoursebyId
+      parameters:
+      - name: courseId
+        in: path
+        description: ID of course to return
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: teacherId
+        in: path
+        description: ID of teacher
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Course'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+
+        404:
+          description: Course not found
+          content: {}
+      security:
+        - Student: []
+  /course/{teacherId}/{courseId}:
+    delete:
+      tags:
+      - course
+      summary: Deletes a course
+      operationId: deleteCourse
+      parameters:
+      - name: courseId
+        in: path
+        description: Course id to delete
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: teacherId
+        in: path
+        description: ID of teacher
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        204:
+          description: Success
+          content: {}
+        404:
+          description: Course not found
+          content: {}
+      security:
+        - Teacher: []
+  /student:
+    post:
+      tags:
+      - student
+      summary: Create student
+      description: Creating a new student account.
+      operationId: createUser
+      requestBody:
+        description: Created student object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Student'
+        
+      responses:
+        201:
+          description: successful operation
+        405:
+          description: Invalid input
+          
+      
+          
+  /student/{studentId}:
+    get:
+      tags:
+      - student
+      summary: Return student info by id
+      operationId: getStudent
+      parameters:
+      - name: studentId
+        in: path
+        description: name that need to be updated
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Student'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        405:
+          description: Invalid input
+        404:
+          description: student not found
+          content: {}      
+
+    put:
+      tags:
+      - student
+      summary: Update data about student by id
+      description: This can only be done by the logged in user.
+      operationId: updateStudent
+      parameters:
+      - name: studentId
+        in: path
+        description: name that need to be updated
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Updated user object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Student'
+        required: true
+      responses:
+        200:
+          description: was modified successfully
+        400:
+          description: Invalid user supplied
+        404:
+          description: User not found
+      security:
+        - Student: []
+      
+    delete:
+      tags:
+      - student
+      summary: Delete student by id
+      description: This can only be done by the logged in user.
+      operationId: deleteStudent
+      parameters:
+      - name: studentId
+        in: path
+        description: The name that needs to be deleted
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: deleted successfully 
+        404:
+          description: User not found
+      security:
+        - Student: []
+  /teacher:
+    post:
+      tags:
+      - teacher
+      summary: Create teacher
+      description: Creating new teacher account.
+      operationId: createTeacher
+      requestBody:
+        description: Created teacher object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Teacher'
+        
+      responses:
+        201:
+          description: successful operation
+        405:
+          description: Invalid input
+          
+      
+  
+    
+          
+  /teacher/{teacherId}:
+    get:
+      tags:
+      - teacher
+      summary: Return teacher info
+      operationId: getTeacher
+      parameters:
+      - name: teacherId
+        in: path
+        description: ID of teacher
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+        404:
+          description: Not found
+      security:
+        - Teacher: []
+    put:
+      tags:
+      - teacher
+      summary: Update data about teacher by id
+      description: This can only be done by the logged in user.
+      operationId: updateTeacher
+      parameters:
+      - name: teacherId
+        in: path
+        description: name that need to be updated
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Updated user object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Teacher'
+        required: true
+      responses:
+        201:
+          description: was modified successfully
+        400:
+          description: Invalid user supplied
+        404:
+          description: User not found
+      security:
+        - Teacher: []
+      
+    delete:
+      tags:
+      - teacher
+      summary: Delete teacher by id
+      description: This can only be done by the logged in user.
+      operationId: deleteTeacher
+      parameters:
+      - name: teacherId
+        in: path
+        description: The name that needs to be deleted
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: deleted successfully 
+        404:
+          description: User not found
+      security:
+        - Teacher: []
+
+components:
+  securitySchemes:
+    Teacher:
+      type: http
+      scheme: basic
+    Student:
+      type: http
+      scheme: basic
+  schemas:
+    Request:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        courseId:
+          type: integer
+          format: int32
+        studentId:
+          type: integer
+          format: int32
+        teacherid:
+          type: integer
+          format: int32
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        password:
+          type: string
+        username:
+          type: string
+        availablecourses:
+          type: array
+          items:
+            type: integer
+            format: int32
+        firstName:
+          type: string
+        lastName:
+          type: string
+    Teacher:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        password:
+          type: string
+        username:
+          type: string
+        createdcourses:
+          type: array
+          items:
+            type: integer
+            format: int32
+        firstName:
+          type: string
+        lastName:
+          type: string
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        title:
+          type: string
+        filling:
+          type: string
+        creatorid:
+          type: integer
+          format: int32
+        conectedstudentsid:
+          type: array
+          maximum: 5
+          items:
+            type: integer
+            format: int32
