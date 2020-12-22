@@ -1,17 +1,25 @@
-
 from flask import Flask
 
 from flask_restful import Api, Resource, reqparse, abort, marshal_with, fields
 from flask_sqlalchemy import SQLAlchemy
 
-
-from models.model import Teacher, Student, Request, Course, Order
+from models.model import Teacher, Student, Request, Course, Order, bcrypt
+from flask_httpauth import HTTPBasicAuth
 
 app = Flask(__name__)
 
 api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/laba5db'
 db = SQLAlchemy(app)
+auth = HTTPBasicAuth()
+
+
+@auth.verify_password
+def verify_student(student, password):
+    if Student.query.filter_by(username=student) and \
+            bcrypt.check_password_hash(Student.query.filter_by(username=student).hash_password, password):
+        return student
+
 
 teacher_put_args = reqparse.RequestParser()
 teacher_put_args.add_argument("username", type=str, required=True)
@@ -45,7 +53,8 @@ class TeacherApi(Resource):
     @marshal_with(teacher_resource_fields)
     def put(self):
         args = teacher_put_args.parse_args()
-        video = Teacher(username=args['username'], password=Student.hash_password(args['password']), firstname=args['firstname'],
+        video = Teacher(username=args['username'], password=Student.hash_password(args['password']),
+                        firstname=args['firstname'],
                         lastname=args['lastname'])
         db.session.add(video)
         db.session.commit()
@@ -96,14 +105,14 @@ student_put_args.add_argument("username", type=str, required=True)
 student_put_args.add_argument("password", type=str, required=True)
 student_put_args.add_argument("firstname", type=str, required=True)
 student_put_args.add_argument("lastname", type=str, required=True)
-#student_put_args.add_argument("course", type=list)
+# student_put_args.add_argument("course", type=list)
 
 student_update_args = reqparse.RequestParser()
 student_update_args.add_argument("username", type=str)
 student_update_args.add_argument("password", type=str)
 student_update_args.add_argument("firstname", type=str)
 student_update_args.add_argument("lastname", type=str)
-#student_update_args.add_argument("course", type=list)
+# student_update_args.add_argument("course", type=list)
 
 course_resource_fields = {
     'id': fields.Integer,
@@ -111,7 +120,6 @@ course_resource_fields = {
     'filling': fields.String,
     'creator_id': fields.Integer,
 }
-
 
 student_resource_fields = {
     'id': fields.Integer,
@@ -155,7 +163,7 @@ class StudentidApi(Resource):
     @marshal_with(student_resource_fields)
     def get(self, student_id):
 
-        result=Student.query.get(ident=student_id)
+        result = Student.query.get(ident=student_id)
 
         if not result:
             abort(404, message="Could not find student with that id")
@@ -177,7 +185,6 @@ class StudentidApi(Resource):
         if args['lastname']:
             result.lastname = args['lastname']
 
-
         result = db.session.merge(result)
 
         db.session.add(result)
@@ -193,13 +200,12 @@ class StudentidApi(Resource):
 
         db.session.delete(result)
         db.session.commit()
-        return  "Student deleted",205
+        return "Student deleted", 205
 
 
 order_put_args = reqparse.RequestParser()
-order_put_args.add_argument("student_id", type=int, required=True)
-order_put_args.add_argument("course_id", type=int, required=True)
 
+order_put_args.add_argument("course_id", type=int, required=True)
 
 order_update_args = reqparse.RequestParser()
 order_update_args.add_argument("student_id", type=int, required=True)
@@ -210,16 +216,19 @@ order_resource_fields = {
     'student_id': fields.Integer,
     'course_id': fields.Integer,
 
-
 }
 
+
 class OrderApi(Resource):
+    @auth.login_required
     def put(self):
         args = order_put_args.parse_args()
-        video = Order(student_id=args['student_id'], course_id=args['course_id'])
+        video = Order(student_id=Student.query.filter_by(username=auth.current_user().username()).id,
+                      course_id=args['course_id'])
         db.session.add(video)
         db.session.commit()
         return video, 201
+
 
 class OrderidApi(Resource):
     @marshal_with(order_resource_fields)
@@ -228,7 +237,7 @@ class OrderidApi(Resource):
         if not result:
             abort(500, message="Student doesn't exist, cannot delete")
         result = db.session.merge(result)
-        #result.courses.remove(Course.query.get(ident=course_id))
+        # result.courses.remove(Course.query.get(ident=course_id))
         result.courses.pop(course_id)
         # db.session.delete(result)
         db.session.commit()
@@ -238,7 +247,7 @@ class OrderidApi(Resource):
     def put(self, student_id, course_id):
         result = Student.query.filter_by(id=student_id).first()
 
-        if(len(result.courses)<5):
+        if len(result.courses) < 5:
 
             result.courses.append(Course.query.get(ident=course_id))
             result = db.session.merge(result)
@@ -247,6 +256,7 @@ class OrderidApi(Resource):
         else:
             abort(500, message="Maximum 5 courses")
         return course_id, 204
+
 
 request_put_args = reqparse.RequestParser()
 request_put_args.add_argument("course_id", type=int, required=True)
@@ -335,8 +345,6 @@ course_update_args.add_argument("filling", type=str, required=True)
 course_update_args.add_argument("creator_id", type=int, required=True)
 
 
-
-
 class CourseApi(Resource):
     @marshal_with(course_resource_fields)
     def get(self):
@@ -395,7 +403,7 @@ class CourseidApi(Resource):
         return 'Request deleted', 204
 
 
-api.add_resource(OrderidApi, "/order/<int:student_id>/<int:course_id>")
+api.add_resource(OrderidApi, "/order/<int:course_id>")
 api.add_resource(OrderApi, "/order")
 
 api.add_resource(CourseidApi, "/course/<int:course_id>")

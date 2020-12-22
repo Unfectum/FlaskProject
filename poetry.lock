@@ -87,6 +87,17 @@ bcrypt = "*"
 Flask = "*"
 
 [[package]]
+name = "flask-httpauth"
+version = "4.2.0"
+description = "Basic and Digest HTTP authentication for Flask routes"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Flask = "*"
+
+[[package]]
 name = "flask-restful"
 version = "0.3.8"
 description = "Simple framework for creating REST APIs"
@@ -258,7 +269,7 @@ watchdog = ["watchdog"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.6.7"
-content-hash = "878bc05644dc5ece63c2577a994f346ca6865d60f92df3f38f4c389d7ed9f9b1"
+content-hash = "56e53f0dd2bf23395fe7f2d5f609908ba2d4faf151169c7638b89b7ee5967060"
 
 [metadata.files]
 alembic = [
@@ -326,6 +337,10 @@ flask = [
 ]
 flask-bcrypt = [
     {file = "Flask-Bcrypt-0.7.1.tar.gz", hash = "sha256:d71c8585b2ee1c62024392ebdbc447438564e2c8c02b4e57b56a4cafd8d13c5f"},
+]
+flask-httpauth = [
+    {file = "Flask-HTTPAuth-4.2.0.tar.gz", hash = "sha256:8c7e49e53ce7dc14e66fe39b9334e4b7ceb8d0b99a6ba1c3562bb528ef9da84a"},
+    {file = "Flask_HTTPAuth-4.2.0-py2.py3-none-any.whl", hash = "sha256:3fcedb99a03985915335a38c35bfee6765cbd66d7f46440fa3b42ae94a90fac7"},
 ]
 flask-restful = [
     {file = "Flask-RESTful-0.3.8.tar.gz", hash = "sha256:5ea9a5991abf2cb69b4aac19793faac6c032300505b325687d7c305ffaa76915"},
