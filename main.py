@@ -21,11 +21,11 @@ def verify_student(student, password):
         return student
 
 
-teacher_put_args = reqparse.RequestParser()
-teacher_put_args.add_argument("username", type=str, required=True)
-teacher_put_args.add_argument("password", type=str, required=True)
-teacher_put_args.add_argument("firstname", type=str, required=True)
-teacher_put_args.add_argument("lastname", type=str, required=True)
+teacher_post_args = reqparse.RequestParser()
+teacher_post_args.add_argument("username", type=str, required=True)
+teacher_post_args.add_argument("password", type=str, required=True)
+teacher_post_args.add_argument("firstname", type=str, required=True)
+teacher_post_args.add_argument("lastname", type=str, required=True)
 
 teacher_update_args = reqparse.RequestParser()
 teacher_update_args.add_argument("username", type=str)
@@ -51,8 +51,8 @@ class TeacherApi(Resource):
         return result
 
     @marshal_with(teacher_resource_fields)
-    def put(self):
-        args = teacher_put_args.parse_args()
+    def post(self):
+        args = teacher_post_args.parse_args()
         video = Teacher(username=args['username'], password=Student.hash_password(args['password']),
                         firstname=args['firstname'],
                         lastname=args['lastname'])
@@ -71,7 +71,7 @@ class TeacheridApi(Resource):
         return result
 
     @marshal_with(teacher_resource_fields)
-    def patch(self, teacher_id):
+    def put(self, teacher_id):
         args = teacher_update_args.parse_args()
         result = Teacher.query.filter_by(id=teacher_id).first()
         if not result:
@@ -100,12 +100,12 @@ class TeacheridApi(Resource):
         return 'Teacher deleted', 204
 
 
-student_put_args = reqparse.RequestParser()
-student_put_args.add_argument("username", type=str, required=True)
-student_put_args.add_argument("password", type=str, required=True)
-student_put_args.add_argument("firstname", type=str, required=True)
-student_put_args.add_argument("lastname", type=str, required=True)
-# student_put_args.add_argument("course", type=list)
+student_post_args = reqparse.RequestParser()
+student_post_args.add_argument("username", type=str, required=True)
+student_post_args.add_argument("password", type=str, required=True)
+student_post_args.add_argument("firstname", type=str, required=True)
+student_post_args.add_argument("lastname", type=str, required=True)
+# student_post_args.add_argument("course", type=list)
 
 student_update_args = reqparse.RequestParser()
 student_update_args.add_argument("username", type=str)
@@ -142,8 +142,8 @@ class StudentApi(Resource):
         return result
 
     @marshal_with(student_resource_fields)
-    def put(self):
-        args = student_put_args.parse_args()
+    def post(self):
+        args = student_post_args.parse_args()
         # courselist=[]
         # if(args['course']):
         #     for c in args['course']:
@@ -170,7 +170,7 @@ class StudentidApi(Resource):
         return result, 200
 
     @marshal_with(student_resource_fields)
-    def patch(self, student_id):
+    def put(self, student_id):
         args = student_update_args.parse_args()
         result = Student.query.filter_by(id=student_id).first()
         if not result:
@@ -203,9 +203,9 @@ class StudentidApi(Resource):
         return "Student deleted", 205
 
 
-order_put_args = reqparse.RequestParser()
+order_post_args = reqparse.RequestParser()
 
-order_put_args.add_argument("course_id", type=int, required=True)
+order_post_args.add_argument("course_id", type=int, required=True)
 
 order_update_args = reqparse.RequestParser()
 order_update_args.add_argument("student_id", type=int, required=True)
@@ -221,8 +221,8 @@ order_resource_fields = {
 
 class OrderApi(Resource):
     @auth.login_required
-    def put(self):
-        args = order_put_args.parse_args()
+    def post(self):
+        args = order_post_args.parse_args()
         video = Order(student_id=Student.query.filter_by(username=auth.current_user().username()).id,
                       course_id=args['course_id'])
         db.session.add(video)
@@ -244,7 +244,7 @@ class OrderidApi(Resource):
         return course_id, 204
 
     @marshal_with(order_resource_fields)
-    def put(self, student_id, course_id):
+    def post(self, student_id, course_id):
         result = Student.query.filter_by(id=student_id).first()
 
         if len(result.courses) < 5:
@@ -258,10 +258,10 @@ class OrderidApi(Resource):
         return course_id, 204
 
 
-request_put_args = reqparse.RequestParser()
-request_put_args.add_argument("course_id", type=int, required=True)
-request_put_args.add_argument("student_id", type=int, required=True)
-request_put_args.add_argument("teacher_id", type=int, required=True)
+request_post_args = reqparse.RequestParser()
+request_post_args.add_argument("course_id", type=int, required=True)
+request_post_args.add_argument("student_id", type=int, required=True)
+request_post_args.add_argument("teacher_id", type=int, required=True)
 
 request_update_args = reqparse.RequestParser()
 request_update_args.add_argument("course_id", type=int, required=True)
@@ -285,8 +285,8 @@ class RequestApi(Resource):
         return result
 
     @marshal_with(request_resource_fields)
-    def put(self):
-        args = request_put_args.parse_args()
+    def post(self):
+        args = request_post_args.parse_args()
         result = Request(course_id=args['course_id'], student_id=args['student_id'],
                          teacher_id=args['teacher_id'])
         db.session.add(result)
@@ -305,8 +305,8 @@ class RequestidApi(Resource):
         return result
 
     @marshal_with(student_resource_fields)
-    def patch(self, request_id):
-        args = request_put_args.parse_args()
+    def put(self, request_id):
+        args = request_post_args.parse_args()
         result = Request.query.filter_by(id=request_id).first()
         if not result:
             abort(404, message="Request doesn't exist, cannot update")
@@ -334,10 +334,10 @@ class RequestidApi(Resource):
         return 'Request deleted', 204
 
 
-course_put_args = reqparse.RequestParser()
-course_put_args.add_argument("title", type=str, required=True)
-course_put_args.add_argument("filling", type=str, required=True)
-course_put_args.add_argument("creator_id", type=int, required=True)
+course_post_args = reqparse.RequestParser()
+course_post_args.add_argument("title", type=str, required=True)
+course_post_args.add_argument("filling", type=str, required=True)
+course_post_args.add_argument("creator_id", type=int, required=True)
 
 course_update_args = reqparse.RequestParser()
 course_update_args.add_argument("title", type=str, required=True)
@@ -354,8 +354,8 @@ class CourseApi(Resource):
         return result
 
     @marshal_with(course_resource_fields)
-    def put(self):
-        args = course_put_args.parse_args()
+    def post(self):
+        args = course_post_args.parse_args()
         result = Course(title=args['title'], filling=args['filling'],
                         creator_id=args['creator_id'])
         db.session.add(result)
@@ -374,8 +374,8 @@ class CourseidApi(Resource):
         return result
 
     @marshal_with(course_resource_fields)
-    def patch(self, course_id):
-        args = course_put_args.parse_args()
+    def put(self, course_id):
+        args = course_post_args.parse_args()
         result = Course.query.filter_by(id=course_id).first()
         if not result:
             abort(404, message="Course doesn't exist, cannot update")
