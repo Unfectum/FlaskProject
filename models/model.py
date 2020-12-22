@@ -1,76 +1,53 @@
 from flask import Flask
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, String, Integer, ForeignKey, orm, create_engine
-
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, orm
+from flask_login import UserMixin
 from sqlalchemy.ext.declarative import declarative_base
 from flask_bcrypt import Bcrypt
-# engine= create_engine(BD_URI)
+
+
 app = Flask(__name__)
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/laba5db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/Flask_db'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 Base = declarative_base()
 
 
-# server_default=text("CURRENT_TIMESTAMP"))
+def hash_password(password):
+    return bcrypt.generate_password_hash(password).decode('utf-8')
 
 
-class Student(db.Model):
-    __tablename__ = 'Student'
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String)
+    username = Column(String, unique=True)
     password = Column(String)
     firstname = Column(String)
     lastname = Column(String)
-    courses = orm.relationship("Course", secondary="orders")
-
-
-    def hash_password(password):
-        return bcrypt.generate_password_hash(password)
-
-
-class Teacher(db.Model):
-    __tablename__ = 'Teacher'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String)
-    password = Column(String)
-    firstname = Column(String)
-    lastname = Column(String)
-
-    def __repr__(self):
-        return f"Video(name = {self.username}, views = {self.firstname}, likes = {self.lastname})"
-
+    courses = orm.relationship("Course", secondary="requests")
+    role = Column(String)
 
 
 class Course(db.Model):
-    __tablename__ = 'Course'
+    __tablename__ = 'courses'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String)
     filling = Column(String)
-    creator_id = Column(Integer, ForeignKey(Teacher.id))
-    creator = orm.relationship(Teacher, backref="Teacher", lazy="joined")
-    students = orm.relationship("Student", secondary="orders")
+    creator_id = Column(Integer, ForeignKey(User.id))
+    creator = orm.relationship(User, backref="User", lazy="joined")
+    students = orm.relationship("User", secondary="requests")
+
 
 class Request(db.Model):
-    __tablename__ = 'Request'
+    __tablename__ = 'requests'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    is_confirmed = Column(Boolean, default=False)
     course_id = Column(Integer, ForeignKey(Course.id))
-    student_id = Column(Integer, ForeignKey(Student.id))
-    teacher_id = Column(Integer, ForeignKey(Teacher.id))
-    course = orm.relationship(Course, foreign_keys=[course_id], backref="course", lazy="joined")
-    student = orm.relationship(Student, foreign_keys=[student_id], backref="student", lazy="joined")
-    teacher = orm.relationship(Teacher, foreign_keys=[teacher_id], backref="teacher", lazy="joined")
-
-class Order(db.Model):
-    __tablename__ = 'orders'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    student_id = Column(Integer, ForeignKey(Student.id))
-    course_id = Column(Integer, ForeignKey(Course.id))
-    student = orm.relationship(Student, backref=orm.backref("orders", cascade="all, delete-orphan"))
-    product = orm.relationship(Course, backref=orm.backref("orders", cascade="all, delete-orphan"))
+    student_id = Column(Integer, ForeignKey(User.id))
+    student = orm.relationship(User, backref=orm.backref("course_students", cascade="all, delete-orphan"))
+    course = orm.relationship(Course, backref=orm.backref("course_students", cascade="all, delete-orphan"))
