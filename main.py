@@ -238,8 +238,9 @@ class RequestApi(Resource):
         args = request_put_args.parse_args()
         request = Request.query.get(ident=args['id'])
         if args['is_confirmed']:
-            temp = Request.query.filter_by(id=args['id'], is_confirmed=True)
-            if len(temp) == 5:
+            temp = Request.query.filter_by(course_id=request.course_id, is_confirmed=True).all()
+            print(temp, len(temp))
+            if len(temp) >= 2:
                 return abort(405, message="No more than 5 students can be added")
         request.is_confirmed = args['is_confirmed']
         request = db.session.merge(request)
