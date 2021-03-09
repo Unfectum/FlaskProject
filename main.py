@@ -11,7 +11,7 @@ from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
 
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/Test_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/Flask_db'
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
